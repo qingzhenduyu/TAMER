@@ -13,7 +13,7 @@ trainer:
         filename: '{epoch}-{step}-{val_ExpRate:.4f}'
   gpus: 0, 1,  2, 3
   accelerator: ddp
-  max_epochs: 120
+  max_epochs: 200
   deterministic: true
   check_val_every_n_epoch: 2
   # resume_from_checkpoint: 
@@ -38,7 +38,7 @@ model:
   early_stopping: false
   temperature: 1.0
   # training
-  learning_rate: 0.08
+  learning_rate: 5e-4
   patience: 10
 
 data:

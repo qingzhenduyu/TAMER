@@ -189,11 +189,14 @@ class LitTAMER(pl.LightningModule):
         return self.tamer_model.beam_search(img, mask, **self.hparams)
 
     def configure_optimizers(self):
-        optimizer = optim.SGD(
-            self.parameters(),
-            lr=self.hparams.learning_rate,
-            momentum=0.9,
-            weight_decay=1e-4,
+        # optimizer = optim.SGD(
+        #     self.parameters(),
+        #     lr=self.hparams.learning_rate,
+        #     momentum=0.9,
+        #     weight_decay=1e-4,
+        # )
+        optimizer = optim.AdamW(
+            self.parameters(), lr=self.hparams.learning_rate, weight_decay=1e-5
         )
         # scheduler = optim.lr_scheduler.MultiStepLR(
         #     optimizer, milestones=self.hparams.milestones, gamma=0.25
