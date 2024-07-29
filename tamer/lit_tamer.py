@@ -159,7 +159,8 @@ class LitTAMER(pl.LightningModule):
         predictions_dict = {}
         with zipfile.ZipFile("result.zip", "w") as zip_f:
             for img_bases, preds, gts in test_outputs:
-                for img_base, pred, gt, im_pred_token in zip(img_bases, preds, gts):
+                # for img_base, pred, gt, im_pred_token in zip(img_bases, preds, gts):
+                for img_base, pred, gt in zip(img_bases, preds, gts):
                     content = f"%{img_base}\n${pred}$".encode()
                     with zip_f.open(f"{img_base}.txt", "w") as f:
                         f.write(content)
@@ -169,14 +170,14 @@ class LitTAMER(pl.LightningModule):
                             "pred": " ".join(pred),
                             "gt": " ".join(gt),
                             "dist": distance,
-                            "im_tokens": " ".join(im_pred_token),
+                            # "im_tokens": " ".join(im_pred_token),
                         }
 
                     predictions_dict[img_base] = {
                         "pred": " ".join(pred),
                         "gt": " ".join(gt),
                         "dist": distance,
-                        "im_tokens": " ".join(im_pred_token),
+                        # "im_tokens": " ".join(im_pred_token),
                     }
         with open("errors.json", "w") as f:
             json.dump(errors_dict, f)
