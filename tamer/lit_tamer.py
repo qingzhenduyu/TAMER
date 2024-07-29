@@ -123,15 +123,15 @@ class LitTAMER(pl.LightningModule):
             sync_dist=True,
         )
 
-        # if self.current_epoch < self.hparams.milestones[0]:
-        #     self.log(
-        #         "val_ExpRate",
-        #         self.exprate_recorder,
-        #         prog_bar=True,
-        #         on_step=False,
-        #         on_epoch=True,
-        #     )
-        #     return
+        if self.current_epoch < self.hparams.milestones[0]:
+            self.log(
+                "val_ExpRate",
+                self.exprate_recorder,
+                prog_bar=True,
+                on_step=False,
+                on_epoch=True,
+            )
+            return
 
         hyps = self.approximate_joint_search(batch.imgs, batch.mask)
 
@@ -159,7 +159,7 @@ class LitTAMER(pl.LightningModule):
         predictions_dict = {}
         with zipfile.ZipFile("result.zip", "w") as zip_f:
             for img_bases, preds, gts in test_outputs:
-                for img_base, pred, gt, im_pred_token in zip(img_bases, preds, gts):
+                for img_base, pred, gt in zip(img_bases, preds, gts):
                     content = f"%{img_base}\n${pred}$".encode()
                     with zip_f.open(f"{img_base}.txt", "w") as f:
                         f.write(content)
@@ -169,14 +169,12 @@ class LitTAMER(pl.LightningModule):
                             "pred": " ".join(pred),
                             "gt": " ".join(gt),
                             "dist": distance,
-                            "im_tokens": " ".join(im_pred_token),
                         }
 
                     predictions_dict[img_base] = {
                         "pred": " ".join(pred),
                         "gt": " ".join(gt),
                         "dist": distance,
-                        "im_tokens": " ".join(im_pred_token),
                     }
         with open("errors.json", "w") as f:
             json.dump(errors_dict, f)
@@ -189,28 +187,29 @@ class LitTAMER(pl.LightningModule):
         return self.tamer_model.beam_search(img, mask, **self.hparams)
 
     def configure_optimizers(self):
-        optimizer = optim.SGD(
+        optimizer = optim.Adadelta(
             self.parameters(),
             lr=self.hparams.learning_rate,
-            momentum=0.9,
+            eps=1e-6,
             weight_decay=1e-4,
         )
-        # scheduler = optim.lr_scheduler.MultiStepLR(
-        #     optimizer, milestones=self.hparams.milestones, gamma=0.25
-        # )
-        reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-            optimizer,
-            mode="max",
-            factor=0.25,
-            patience=self.hparams.patience // self.trainer.check_val_every_n_epoch,
-        )
 
-        scheduler = {
-            "scheduler": reduce_scheduler,
-            "monitor": "val_ExpRate",
-            "interval": "epoch",
-            "frequency": self.trainer.check_val_every_n_epoch,
-            "strict": True,
-        }
+        scheduler = optim.lr_scheduler.MultiStepLR(
+            optimizer, milestones=self.hparams.milestones, gamma=0.1
+        )
+        # reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        #     optimizer,
+        #     mode="max",
+        #     factor=0.25,
+        #     patience=self.hparams.patience // self.trainer.check_val_every_n_epoch,
+        # )
+
+        # scheduler = {
+        #     "scheduler": reduce_scheduler,
+        #     "monitor": "val_ExpRate",
+        #     "interval": "epoch",
+        #     "frequency": self.trainer.check_val_every_n_epoch,
+        #     "strict": True,
+        # }
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler}

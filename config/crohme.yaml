@@ -14,7 +14,7 @@ trainer:
   gpus: 0, 1, 2, 3
   accelerator: ddp
   check_val_every_n_epoch: 2
-  max_epochs: 250
+  max_epochs: 400
   deterministic: true
 model:
   d_model: 256
@@ -37,7 +37,7 @@ model:
   early_stopping: false
   temperature: 1.0
   # training
-  learning_rate: 0.08
+  learning_rate: 1.0
   patience: 20
   milestones:
     - 300
@@ -48,6 +48,6 @@ data:
   max_size: 320000
   scale_to_limit: true
   train_batch_size: 8
-  eval_batch_size: 4
+  eval_batch_size: 2
   num_workers: 5
   scale_aug: false
