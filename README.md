@@ -1,6 +1,6 @@
 <div align="center">    
  
-# TAMER:
+# TAMER: Tree-Aware Transformer for Handwritten Mathematical Expression Recognition
 
 </div>
 
@@ -15,12 +15,7 @@
 ├── lightning_logs      # training logs
 │   └── version_0      # ckpt for CROHME dataset
 │       ├── checkpoints
-│       │   └── epoch=125-step=47375-val_ExpRate=0.6101.ckpt
-│       ├── config.yaml
-│       └── hparams.yaml
-│   └── version_1      # ckpt for HME100k dataset
-│       ├── checkpoints
-│       │   └── epoch=55-step=175503-val_ExpRate=0.6924.ckpt
+│       │   └── epoch=315-step=118815-val_ExpRate=0.6113.ckpt
 │       ├── config.yaml
 │       └── hparams.yaml
 ├── .gitignore
@@ -79,6 +74,7 @@ bash eval/eval_hme100k.sh 1
 
 ## Reference
 - [CoMER](https://github.com/Green-Wood/CoMER) | [arXiv](https://arxiv.org/abs/2207.04410)
+- [ICAL](https://github.com/qingzhenduyu/ICAL) | [arXiv](https://arxiv.org/abs/2405.09032)
 - [BTTR](https://github.com/Green-Wood/BTTR) | [arXiv](https://arxiv.org/abs/2105.02412)
 - [TreeDecoder](https://github.com/JianshuZhang/TreeDecoder)
 - [CAN](https://github.com/LBH1024/CAN) | [arXiv](https://arxiv.org/abs/2207.11463)

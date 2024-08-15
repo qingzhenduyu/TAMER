@@ -545,19 +545,3 @@ if __name__ == "__main__":
         print("\t\t".join(g))
     print(to_struct(latex.split()))
     print(tree_complexity(r"\sum _ { 1 } \frac { x ^ { 2 } + 1 } { y }"))
-    # predict_tree = list2node(gtd)
-    # predict_latex = tree2latex(predict_tree)
-    # predict_latex = " ".join(predict_latex)
-
-    # print("shuffled gtd:")
-    # gtd = node2list(tree, is_shuffle=True)
-    # for g in gtd:
-    #     g = [str(item) for item in g]
-    #     print("\t\t".join(g))
-    # shuffle_tree = list2node(gtd)
-    # shuffle_latex = tree2latex(shuffle_tree)
-    # shuffle_latex = " ".join(shuffle_latex)
-    # print(latex == predict_latex)
-    # print(latex)
-    # print(predict_latex)
-    # print(shuffle_latex)

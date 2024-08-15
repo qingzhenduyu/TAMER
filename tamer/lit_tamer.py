@@ -123,15 +123,15 @@ class LitTAMER(pl.LightningModule):
             sync_dist=True,
         )
 
-        if self.current_epoch < self.hparams.milestones[0]:
-            self.log(
-                "val_ExpRate",
-                self.exprate_recorder,
-                prog_bar=True,
-                on_step=False,
-                on_epoch=True,
-            )
-            return
+        # if self.current_epoch < self.hparams.milestones[0]:
+        #     self.log(
+        #         "val_ExpRate",
+        #         self.exprate_recorder,
+        #         prog_bar=True,
+        #         on_step=False,
+        #         on_epoch=True,
+        #     )
+        #     return
 
         hyps = self.approximate_joint_search(batch.imgs, batch.mask)
 
@@ -193,6 +193,9 @@ class LitTAMER(pl.LightningModule):
             eps=1e-6,
             weight_decay=1e-4,
         )
+        # optimizer = optim.AdamW(
+        #     self.parameters(), lr=self.hparams.learning_rate, weight_decay=1e-4
+        # )
 
         scheduler = optim.lr_scheduler.MultiStepLR(
             optimizer, milestones=self.hparams.milestones, gamma=0.1
