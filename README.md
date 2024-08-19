@@ -1,6 +1,7 @@
 <div align="center">    
  
 # TAMER: Tree-Aware Transformer for Handwritten Mathematical Expression Recognition
+[![arXiv](https://img.shields.io/badge/arXiv-2408.08578-b31b1b.svg)](https://arxiv.org/abs/2408.08578)
 
 </div>
 
