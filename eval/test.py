@@ -7,7 +7,8 @@ from tamer.datamodule import HMEDatamodule
 from tamer.lit_tamer import LitTAMER
 
 seed_everything(7)
-years = {'2014': 986, '2016': 1147, '2019': 1199, 'test': 24607}
+years = {'2014': 986, '2016': 1147, '2019': 1199, 'test': 24607,'N1': 1875, 'N2': 304, 'N3': 1464}
+
 
 
 def main(
@@ -27,6 +28,7 @@ def main(
         test_folder=test_year,
         max_size=max_size,
         scale_to_limit=scale_to_limit,
+        eval_batch_size=1,
     )
 
     model = LitTAMER.load_from_checkpoint(ckp_path)

@@ -50,4 +50,4 @@ data:
   train_batch_size: 8
   eval_batch_size: 2
   num_workers: 5
-  scale_aug: false
+  scale_aug: true
