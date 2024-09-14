@@ -133,6 +133,7 @@ Results_pred_symlg
 *.ckpt
 lightning_logs/
 *.sh
+!eval/*.sh
 mml_temp/
 perl_warning.txt
 inkml_temp/
