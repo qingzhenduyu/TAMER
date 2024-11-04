@@ -13,10 +13,9 @@ trainer:
         filename: '{epoch}-{step}-{val_ExpRate:.4f}'
   gpus: 0, 1,  2, 3
   accelerator: ddp
-  max_epochs: 70
+  max_epochs: 120
   deterministic: true
   check_val_every_n_epoch: 2
-  # resume_from_checkpoint: '/home/zhujianhua/2023/HMER/TAMER/lightning_logs/version_38/checkpoints/epoch=69-step=219379-val_ExpRate=0.6802.ckpt'
 model:
   d_model: 256
   # encoder
@@ -38,12 +37,8 @@ model:
   early_stopping: false
   temperature: 1.0
   # training
-  learning_rate: 1.0
+  learning_rate: 0.08
   patience: 10
-  milestones:
-    - 45
-    - 55
-    - 60
 data:
   folder: data/hme100k
   test_folder: test

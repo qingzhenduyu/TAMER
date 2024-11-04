@@ -83,10 +83,13 @@ class LitTAMER(pl.LightningModule):
     def training_step(self, batch: Batch, _):
         tgt, out = to_bi_tgt_out(batch.indices, self.device)
         struct_out, _ = to_struct_output(batch.indices, self.device)
-        out_hat, sim = self(batch.imgs, batch.mask, tgt)
+        out_hat, sim, exp_out = self(batch.imgs, batch.mask, tgt)
 
-        loss = ce_loss(out_hat, out)
-        self.log("train_loss", loss, on_step=False, on_epoch=True, sync_dist=True)
+        fusion_loss = ce_loss(out_hat, out)
+        exp_loss = ce_loss(exp_out, out)
+
+        self.log("train_loss", fusion_loss, on_step=False, on_epoch=True, sync_dist=True)
+        self.log("train_exp_loss", exp_loss, on_step=False, on_epoch=True, sync_dist=True)
         struct_loss = ce_loss(sim, struct_out, ignore_idx=-1)
         self.log(
             "train/struct_loss",
@@ -96,18 +99,28 @@ class LitTAMER(pl.LightningModule):
             sync_dist=True,
         )
 
-        return loss + struct_loss
+        return fusion_loss + exp_loss + struct_loss
 
 
     def validation_step(self, batch: Batch, _):
         tgt, out = to_bi_tgt_out(batch.indices, self.device)
         struct_out, _ = to_struct_output(batch.indices, self.device)
-        out_hat, sim = self(batch.imgs, batch.mask, tgt)
+        out_hat, sim, exp_out = self(batch.imgs, batch.mask, tgt)
 
-        loss = ce_loss(out_hat, out)
+        fusion_loss = ce_loss(out_hat, out)
+        exp_loss = ce_loss(exp_out, out)
+
         self.log(
             "val_loss",
-            loss,
+            fusion_loss,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=True,
+            sync_dist=True,
+        )
+        self.log(
+            "val_exp_loss",
+            exp_loss,
             on_step=False,
             on_epoch=True,
             prog_bar=True,
@@ -123,15 +136,15 @@ class LitTAMER(pl.LightningModule):
             sync_dist=True,
         )
 
-        # if self.current_epoch < self.hparams.milestones[0]:
-        #     self.log(
-        #         "val_ExpRate",
-        #         self.exprate_recorder,
-        #         prog_bar=True,
-        #         on_step=False,
-        #         on_epoch=True,
-        #     )
-        #     return
+        if self.current_epoch < self.hparams.milestones[0]:
+            self.log(
+                "val_ExpRate",
+                self.exprate_recorder,
+                prog_bar=True,
+                on_step=False,
+                on_epoch=True,
+            )
+            return
 
         hyps = self.approximate_joint_search(batch.imgs, batch.mask)
 

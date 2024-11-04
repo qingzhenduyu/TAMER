@@ -47,11 +47,13 @@ class StructSimOneDir(nn.Module):
         )
         q = self.to_q(tgt)
         k = self.to_k(tgt)
+        z = (q+k)/2
+        z = rearrange(z, "t b d -> b t d")
         q = rearrange(q, "t b d -> b t () d")
         k = rearrange(k, "l b d -> b () l d")
         sim = self.to_sim(q + k).squeeze(-1)
         sim = sim.masked_fill(tgt_key_padding_mask[:, None, :], float("-inf"))
-        return sim
+        return sim, z
 
 
 class StructSim(nn.Module):
@@ -64,10 +66,12 @@ class StructSim(nn.Module):
         l2r_out, r2l_out = torch.chunk(out, 2, dim=1)
         l2r_kp_mask, r2l_kp_mask = torch.chunk(src_key_padding_mask, 2, dim=0)
         
-        l2r_sim = self.l2r_struct_sim(l2r_out, l2r_kp_mask)
-        r2l_sim = self.r2l_struct_sim(r2l_out, r2l_kp_mask)
+        l2r_sim, l2r_z = self.l2r_struct_sim(l2r_out, l2r_kp_mask)
+        r2l_sim, r2l_z = self.r2l_struct_sim(r2l_out, r2l_kp_mask)
 
-        return torch.cat((l2r_sim, r2l_sim), dim=0)
+        sim = torch.cat((l2r_sim, r2l_sim), dim=0)
+        z = torch.cat((l2r_z, r2l_z), dim=0)
+        return sim, z
     
 
 def _build_transformer_decoder(
@@ -129,7 +133,11 @@ class Decoder(DecodeModel):
             cross_coverage=cross_coverage,
             self_coverage=self_coverage,
         )
-        self.proj = nn.Linear(d_model, vocab_size)
+        self.fusion = FusionModule(d_model)
+
+        self.fusion_proj = nn.Linear(d_model, vocab_size)
+        self.exp_proj = nn.Linear(d_model, vocab_size)
+
         self.struct_sim = StructSim(d_model)
 
 
@@ -174,7 +182,7 @@ class Decoder(DecodeModel):
         src_mask = rearrange(src_mask, "b h w -> b (h w)")
         tgt = rearrange(tgt, "b l d -> l b d")
 
-        out = self.model(
+        exp_out = self.model(
             tgt=tgt,
             memory=src,
             height=h,
@@ -183,15 +191,45 @@ class Decoder(DecodeModel):
             memory_key_padding_mask=src_mask,
         )
 
-        sim = self.struct_sim(out, tgt_pad_mask)
+        sim, z = self.struct_sim(exp_out, tgt_pad_mask)
 
-        out = rearrange(out, "l b d -> b l d")
-        out = self.proj(out)
+        exp_out = rearrange(exp_out, "l b d -> b l d")
 
-        return out, sim
+        fusion_out = self.fusion(exp_out, z)
+        fusion_out = self.fusion_proj(fusion_out)
+        
+        exp_out = self.exp_proj(exp_out)
+
+        return fusion_out, sim, exp_out
 
     def transform(
         self, src: List[FloatTensor], src_mask: List[LongTensor], input_ids: LongTensor
     ) -> FloatTensor:
         assert len(src) == 1 and len(src_mask) == 1
         return self(src[0], src_mask[0], input_ids)
+
+class FusionModule(nn.Module):
+    def __init__(self,  d_model: int,):
+        super(FusionModule, self).__init__()
+        self.d_model = d_model
+        self.w_att = nn.Linear(2 * d_model, d_model)
+
+    def forward(self, e_feature: FloatTensor, i_feature: FloatTensor):
+        """generate output fusing e_feature & i_feature
+
+        Parameters
+        ----------
+        e_feature : FloatTensor
+            [b, l, d]
+        i_feature: FloatTensor
+            [b, l, d]
+
+        Returns
+        -------
+        FloatTensor
+            [b, l, d]
+        """
+        f = torch.cat((e_feature, i_feature), dim=2)
+        f_att = torch.sigmoid(self.w_att(f))
+        output = f_att * i_feature + (1 - f_att) * e_feature
+        return output

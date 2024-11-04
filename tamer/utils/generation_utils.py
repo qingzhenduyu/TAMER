@@ -127,7 +127,7 @@ class DecodeModel(pl.LightningModule):
         l2r_tgt, _ = to_tgt_output(hyps, "l2r", self.device)
         r2l_tgt, _ = to_tgt_output(hyps, "r2l", self.device)
         tgt = torch.cat((l2r_tgt, r2l_tgt), dim=0)
-        _, sim = self.transform(
+        _, sim, _ = self.transform(
             [src[0].repeat(2, 1, 1, 1)], [src_mask[0].repeat(2, 1, 1)], tgt
         )
 
