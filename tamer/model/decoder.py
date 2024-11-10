@@ -41,9 +41,9 @@ class StructSimOneDir(nn.Module):
         self.to_k = nn.Linear(d_model, d_model)
         self.to_sim = nn.Sequential(nn.ReLU(inplace=True), nn.Linear(d_model, 1))
 
-    def forward(self, tgt, tgt_key_padding_mask):
+    def forward(self, tgt, tgt_key_padding_mask, tgt_mask):
         tgt = self.trm(
-            src=tgt, src_key_padding_mask=tgt_key_padding_mask
+            src=tgt, mask=tgt_mask, src_key_padding_mask=tgt_key_padding_mask
         )
         q = self.to_q(tgt)
         k = self.to_k(tgt)
@@ -62,12 +62,12 @@ class StructSim(nn.Module):
         self.l2r_struct_sim = StructSimOneDir(d_model)
         self.r2l_struct_sim = StructSimOneDir(d_model)
 
-    def forward(self, out, src_key_padding_mask):
+    def forward(self, out, src_key_padding_mask, tgt_mask):
         l2r_out, r2l_out = torch.chunk(out, 2, dim=1)
         l2r_kp_mask, r2l_kp_mask = torch.chunk(src_key_padding_mask, 2, dim=0)
         
-        l2r_sim, l2r_z = self.l2r_struct_sim(l2r_out, l2r_kp_mask)
-        r2l_sim, r2l_z = self.r2l_struct_sim(r2l_out, r2l_kp_mask)
+        l2r_sim, l2r_z = self.l2r_struct_sim(l2r_out, l2r_kp_mask, tgt_mask)
+        r2l_sim, r2l_z = self.r2l_struct_sim(r2l_out, r2l_kp_mask, tgt_mask)
 
         sim = torch.cat((l2r_sim, r2l_sim), dim=0)
         z = torch.cat((l2r_z, r2l_z), dim=0)
@@ -191,7 +191,7 @@ class Decoder(DecodeModel):
             memory_key_padding_mask=src_mask,
         )
 
-        sim, z = self.struct_sim(exp_out, tgt_pad_mask)
+        sim, z = self.struct_sim(exp_out, tgt_pad_mask, tgt_mask)
 
         exp_out = rearrange(exp_out, "l b d -> b l d")
 

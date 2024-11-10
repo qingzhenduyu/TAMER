@@ -45,6 +45,6 @@ data:
   max_size: 480000
   scale_to_limit: false
   train_batch_size: 8
-  eval_batch_size: 4
+  eval_batch_size: 2
   num_workers: 5
   scale_aug: false

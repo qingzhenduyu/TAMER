@@ -136,15 +136,15 @@ class LitTAMER(pl.LightningModule):
             sync_dist=True,
         )
 
-        if self.current_epoch < self.hparams.milestones[0]:
-            self.log(
-                "val_ExpRate",
-                self.exprate_recorder,
-                prog_bar=True,
-                on_step=False,
-                on_epoch=True,
-            )
-            return
+        # if self.current_epoch < self.hparams.milestones[0]:
+        #     self.log(
+        #         "val_ExpRate",
+        #         self.exprate_recorder,
+        #         prog_bar=True,
+        #         on_step=False,
+        #         on_epoch=True,
+        #     )
+        #     return
 
         hyps = self.approximate_joint_search(batch.imgs, batch.mask)
 
@@ -200,32 +200,25 @@ class LitTAMER(pl.LightningModule):
         return self.tamer_model.beam_search(img, mask, **self.hparams)
 
     def configure_optimizers(self):
-        optimizer = optim.Adadelta(
+        optimizer = optim.SGD(
             self.parameters(),
             lr=self.hparams.learning_rate,
-            eps=1e-6,
+            momentum=0.9,
             weight_decay=1e-4,
         )
-        # optimizer = optim.AdamW(
-        #     self.parameters(), lr=self.hparams.learning_rate, weight_decay=1e-4
-        # )
 
-        scheduler = optim.lr_scheduler.MultiStepLR(
-            optimizer, milestones=self.hparams.milestones, gamma=0.1
+        reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer,
+            mode="max",
+            factor=0.25,
+            patience=self.hparams.patience // self.trainer.check_val_every_n_epoch,
         )
-        # reduce_scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-        #     optimizer,
-        #     mode="max",
-        #     factor=0.25,
-        #     patience=self.hparams.patience // self.trainer.check_val_every_n_epoch,
-        # )
-
-        # scheduler = {
-        #     "scheduler": reduce_scheduler,
-        #     "monitor": "val_ExpRate",
-        #     "interval": "epoch",
-        #     "frequency": self.trainer.check_val_every_n_epoch,
-        #     "strict": True,
-        # }
+        scheduler = {
+            "scheduler": reduce_scheduler,
+            "monitor": "val_ExpRate",
+            "interval": "epoch",
+            "frequency": self.trainer.check_val_every_n_epoch,
+            "strict": True,
+        }
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler}
