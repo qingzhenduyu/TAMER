@@ -14,9 +14,24 @@
 ├── eval/             # evaluation scripts
 ├── tamer               # model definition folder
 ├── lightning_logs      # training logs
-│   └── version_0      # ckpt for CROHME dataset
+│   └── version_0      # ckpt(w/o fusion) for CROHME dataset 
 │       ├── checkpoints
 │       │   └── epoch=315-step=118815-val_ExpRate=0.6113.ckpt
+│       ├── config.yaml
+│       └── hparams.yaml
+│   └── version_1      # ckpt(w/o fusion) for HME100K dataset 
+│       ├── checkpoints
+│       │   └── epoch=51-step=162967-val_ExpRate=0.6851.ckpt
+│       ├── config.yaml
+│       └── hparams.yaml
+│   └── version_2      # ckpt(w/ fusion) for CROHME dataset 
+│       ├── checkpoints
+│       │   └── 
+│       ├── config.yaml
+│       └── hparams.yaml
+│   └── version_3      # ckpt(w/ fusion) for HME100K dataset 
+│       ├── checkpoints
+│       │   └── epoch=55-step=175503-val_ExpRate=0.6954.ckpt
 │       ├── config.yaml
 │       └── hparams.yaml
 ├── .gitignore
