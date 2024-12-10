@@ -5,6 +5,9 @@
 
 </div>
 
+## News
+[2024/12/10] TAMER has been accepted to AAAI 2025! 🎉🎉🎉
+
 ## Project structure
 ```bash
 ├── config/         # config for TAMER hyperparameter
@@ -87,7 +90,9 @@ bash eval/eval_crohme.sh 0
 bash eval/eval_hme100k.sh 1
 ```
 
-## Results
+## Experimental Results
+
+### CROHME Dataset
 | Method | CROHME 2014 ExpRate↑ | CROHME 2014 ≤1↑ | CROHME 2014 ≤2↑ | CROHME 2016 ExpRate↑ | CROHME 2016 ≤1↑ | CROHME 2016 ≤2↑ | CROHME 2019 ExpRate↑ | CROHME 2019 ≤1↑ | CROHME 2019 ≤2↑ |
 |--------|----------------------|-----------------|-----------------|----------------------|-----------------|-----------------|----------------------|-----------------|-----------------|
 | NAMER  | 60.51                | 75.03           | 82.25           | 60.24                | 73.5            | 80.21           | 61.72                | 75.31           | 82.07           |
@@ -96,6 +101,19 @@ bash eval/eval_hme100k.sh 1
 | CoMER† | 58.38±0.62           | 74.48±1.41      | 81.14±0.91      | 56.98±1.41           | 74.44±0.93      | 81.87±0.73      | 59.12±0.43           | 77.45±0.70      | 83.87±0.80      |
 | ICAL   | 60.63±0.61           | 75.99±0.77      | 82.80±0.40      | 58.79±0.73           | 76.06±0.37      | 83.38±0.16      | 60.51±0.71           | 78.00±0.66      | 84.63±0.45      |
 | **TAMER** | **61.23±0.42**    | **76.77±0.78**  | **83.25±0.52**  | **60.26±0.78**       | **76.91±0.38**  | **84.05±0.41**  | **61.97±0.54**       | **78.97±0.42**  | **85.80±0.45**  |
+
+### HME100K Dataset
+
+| Method | HME100K ExpRate↑ | HME100K ≤1↑ | HME100K ≤2↑ |
+|--------|----------------------|-----------------|-----------------|
+| BTTR   |          64.1       | -           |      -      |
+| CoMER† |          68.12       | 84.20           |      89.71      |
+| ICAL   |          69.06       | 85.16          |     90.61       |
+| NAMER  |          68.52       | 83.10        |     89.30      |
+| TAMER  |          68.52       | 84.61      |      89.94     |
+| TAMER w/ fusion|          **69.50**       | **85.48**     |      **90.80**     |
+
+### Bracket Matching Accuracy
 <figure>
     <img src="images/Bracket_Matching_Accuracy.png" alt="Bracket_Matching_Accuracy">
     <figcaption>Bracket Matching Accuracy under different structural complexities on CROHME 2014/2016/2019 and HME100K (in %). TAMER consistently maintains an accuracy rate of over 92% across various structural complexities, effectively resolving bracket matching issues.</figcaption>
