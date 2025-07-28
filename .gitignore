@@ -130,8 +130,9 @@ test_temp
 Results_pred_symlg
 *.tfevents.*
 
+
 *.ckpt
-lightning_logs/
+lightning_logs/*
 *.sh
 !eval/*.sh
 mml_temp/
@@ -139,3 +140,7 @@ perl_warning.txt
 inkml_temp/
 lg_temp/
 *.egg-info/
+
+
+!lightning_logs/version_3/
+!lightning_logs/version_3/**
